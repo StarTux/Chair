@@ -81,13 +81,15 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         Stairs stairs = (Stairs) block.getBlockData();
         if (stairs.getHalf() != Bisected.Half.BOTTOM) return;
         if (stairs.getShape() != Stairs.Shape.STRAIGHT) return;
-        if (!block.getRelative(BlockFace.UP, 1).isEmpty()) return;
-        if (!block.getRelative(BlockFace.UP, 2).isEmpty()) return;
+        if (!block.getRelative(BlockFace.UP, 1).isPassable()) return;
+        if (!block.getRelative(BlockFace.UP, 2).isPassable()) return;
         Location ploc = player.getLocation();
         if (ploc.getBlockY() != block.getY()) return;
         BlockFace face = stairs.getFacing().getOppositeFace();
+        if (!block.getRelative(face).isPassable()) return;
         Location loc = block.getLocation().add(0.5, 0.3, 0.5);
         if (ploc.distanceSquared(loc) > 4.0) return;
+        event.setCancelled(true); // No return
         Vector dir = face.getDirection();
         loc = loc.setDirection(face.getDirection());
         loc = loc.add(dir.normalize().multiply(0.2));
