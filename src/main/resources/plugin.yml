@@ -4,7 +4,7 @@ name: Chair
 version: 0.1
 api-version: 1.13
 
-description: Chair Plugin
+description: Use stairs as chairs
 author: StarTux
 website: https://cavetale.com
 

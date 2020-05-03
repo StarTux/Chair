@@ -65,7 +65,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         uuidMap.put(chair.armorStand.getUniqueId(), chair);
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         Player player = event.getPlayer();
@@ -97,7 +97,6 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         Chair chair = new Chair(block, armorStand);
         enableChair(chair);
         // Feedback
-        player.sendActionBar("You sit in the chair");
         loc.getWorld().playSound(loc, block.getSoundGroup().getHitSound(), 1.0f, 1.0f);
     }
 
