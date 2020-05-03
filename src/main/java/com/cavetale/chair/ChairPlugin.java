@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -115,6 +116,13 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         if (!(event.getDismounted() instanceof ArmorStand)) return;
         ArmorStand armorStand = (ArmorStand) event.getDismounted();
         Chair chair = uuidMap.get(armorStand.getUniqueId());
+        if (chair == null) return;
+        disableChair(chair);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onBlockBreak(BlockBreakEvent event) {
+        Chair chair = blockMap.get(event.getBlock());
         if (chair == null) return;
         disableChair(chair);
     }
