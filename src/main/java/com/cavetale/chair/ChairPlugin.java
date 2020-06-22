@@ -69,6 +69,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (event.isBlockInHand()) return;
         Player player = event.getPlayer();
         if (player.isSneaking()) return;
         if (player.getGameMode() == GameMode.SPECTATOR) return;
