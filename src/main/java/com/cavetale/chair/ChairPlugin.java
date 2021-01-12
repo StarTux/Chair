@@ -50,7 +50,9 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
     boolean isOccupied(Block block) {
         Chair chair = blockMap.get(block);
         if (chair == null) return false;
-        if (chair.armorStand.isValid()) return true;
+        if (chair.armorStand.isValid() && !chair.armorStand.getPassengers().isEmpty()) {
+            return true;
+        }
         disableChair(chair);
         return false;
     }
@@ -66,7 +68,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         uuidMap.put(chair.armorStand.getUniqueId(), chair);
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.isBlockInHand()) return;
@@ -90,7 +92,6 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         if (!block.getRelative(face).isPassable()) return;
         Location loc = block.getLocation().add(0.5, 0.3, 0.5);
         if (ploc.distanceSquared(loc) > 4.0) return;
-        event.setCancelled(true); // No return
         Vector dir = face.getDirection();
         loc = loc.setDirection(face.getDirection());
         loc = loc.add(dir.normalize().multiply(0.2));
@@ -99,6 +100,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
                 as.setVisible(false);
                 as.setMarker(true);
             });
+        if (armorStand == null) return;
         player.teleport(loc);
         armorStand.addPassenger(player);
         Chair chair = new Chair(block, armorStand);
