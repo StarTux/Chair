@@ -101,8 +101,10 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
                 as.setMarker(true);
             });
         if (armorStand == null) return;
-        player.teleport(loc);
-        armorStand.addPassenger(player);
+        if (!armorStand.addPassenger(player)) {
+            armorStand.remove();
+            return;
+        }
         Chair chair = new Chair(block, armorStand);
         enableChair(chair);
         // Feedback
