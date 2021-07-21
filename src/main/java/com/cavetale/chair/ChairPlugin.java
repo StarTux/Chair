@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Tag;
@@ -43,8 +44,9 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
 
     @RequiredArgsConstructor
     static final class Chair {
-        final Block block;
-        final ArmorStand armorStand;
+        private final Block block;
+        private final ArmorStand armorStand;
+        private final Vector direction;
     }
 
     boolean isOccupied(Block block) {
@@ -107,7 +109,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
             armorStand.remove();
             return;
         }
-        Chair chair = new Chair(block, armorStand);
+        Chair chair = new Chair(block, armorStand, loc.getDirection());
         enableChair(chair);
         // Feedback
         loc.getWorld().playSound(loc, block.getSoundGroup().getHitSound(), 1.0f, 1.0f);
@@ -125,11 +127,18 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onEntityDismount(EntityDismountEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
         if (!(event.getDismounted() instanceof ArmorStand)) return;
         ArmorStand armorStand = (ArmorStand) event.getDismounted();
         Chair chair = uuidMap.get(armorStand.getUniqueId());
         if (chair == null) return;
         disableChair(chair);
+        Player player = (Player) event.getEntity();
+        Bukkit.getScheduler().runTask(this, () -> {
+                Location loc = chair.block.getLocation().add(0.5, 0.5, 0.5);
+                loc.setDirection(chair.direction);
+                player.teleport(loc);
+            });
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
