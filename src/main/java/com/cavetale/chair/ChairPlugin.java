@@ -134,8 +134,11 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         if (chair == null) return;
         disableChair(chair);
         Player player = (Player) event.getEntity();
+        Location ploc = player.getLocation();
         Bukkit.getScheduler().runTask(this, () -> {
                 Location loc = chair.block.getLocation().add(0.5, 0.5, 0.5);
+                if (!ploc.getWorld().equals(loc.getWorld())) return;
+                if (ploc.distanceSquared(loc) >= 1.0) return;
                 loc.setDirection(chair.direction);
                 player.teleport(loc);
             });
