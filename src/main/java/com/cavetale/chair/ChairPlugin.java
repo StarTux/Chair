@@ -14,6 +14,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -78,7 +79,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         if (player.isSneaking()) return;
         if (player.getGameMode() == GameMode.SPECTATOR) return;
         if (player.getVehicle() != null) return;
-        if (!player.isOnGround()) return;
+        if (!((Entity) player).isOnGround()) return;
         if (!player.hasPermission("chair.use")) return;
         Block block = event.getClickedBlock();
         if (isOccupied(block)) return;
