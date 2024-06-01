@@ -21,11 +21,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
-import org.spigotmc.event.entity.EntityDismountEvent;
 
 public final class ChairPlugin extends JavaPlugin implements Listener {
     Map<Block, Chair> blockMap = new HashMap<>();
@@ -113,7 +113,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         Chair chair = new Chair(block, armorStand, loc.getDirection());
         enableChair(chair);
         // Feedback
-        loc.getWorld().playSound(loc, block.getSoundGroup().getHitSound(), 1.0f, 1.0f);
+        loc.getWorld().playSound(loc, block.getBlockSoundGroup().getHitSound(), 1.0f, 1.0f);
     }
 
     @EventHandler
