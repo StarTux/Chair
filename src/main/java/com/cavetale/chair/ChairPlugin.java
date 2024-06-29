@@ -40,6 +40,7 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
     public void onDisable() {
         for (Chair chair : new ArrayList<>(blockMap.values())) {
             disableChair(chair);
+            teleportOut(chair);
         }
     }
 
@@ -64,8 +65,20 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         uuidMap.put(chair.armorStand.getUniqueId(), chair);
     }
 
+    private void teleportOut(Chair chair) {
+        final Player player = Bukkit.getPlayer(chair.playerUuid);
+        if (player == null) return;
+        final Location ploc = player.getLocation();
+        final Block block = chair.blockVector.toBlock();
+        final Location loc = block.getLocation().add(0.5, 0.5, 0.5);
+        if (!ploc.getWorld().equals(loc.getWorld())) return;
+        if (ploc.distanceSquared(loc) >= 1.0) return;
+        loc.setDirection(chair.direction);
+        player.teleport(loc);
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    private void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.isBlockInHand()) return;
         final Player player = event.getPlayer();
@@ -103,46 +116,38 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
             armorStand.remove();
             return;
         }
-        final Chair chair = new Chair(toBlockVector(block), armorStand, loc.getDirection());
+        final Chair chair = new Chair(toBlockVector(block), armorStand, loc.getDirection(), player.getUniqueId());
         enableChair(chair);
         // Feedback
         loc.getWorld().playSound(loc, block.getBlockSoundGroup().getHitSound(), 1.0f, 1.0f);
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
+    private void onPlayerQuit(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
         if (!(player.getVehicle() instanceof ArmorStand)) return;
         final ArmorStand armorStand = (ArmorStand) player.getVehicle();
         final Chair chair = uuidMap.get(armorStand.getUniqueId());
         if (chair == null) return;
         disableChair(chair);
+        teleportOut(chair);
     }
 
     @EventHandler
-    public void onEntityDismount(EntityDismountEvent event) {
-        if (!(event.getEntity() instanceof Player)) return;
-        if (!(event.getDismounted() instanceof ArmorStand)) return;
-        ArmorStand armorStand = (ArmorStand) event.getDismounted();
-        Chair chair = uuidMap.get(armorStand.getUniqueId());
+    private void onEntityDismount(EntityDismountEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getDismounted() instanceof ArmorStand armorStand)) return;
+        final Chair chair = uuidMap.get(armorStand.getUniqueId());
         if (chair == null) return;
         disableChair(chair);
-        Player player = (Player) event.getEntity();
-        Bukkit.getScheduler().runTask(this, () -> {
-                final Location ploc = player.getLocation();
-                final Block block = chair.blockVector.toBlock();
-                final Location loc = block.getLocation().add(0.5, 0.5, 0.5);
-                if (!ploc.getWorld().equals(loc.getWorld())) return;
-                if (ploc.distanceSquared(loc) >= 1.0) return;
-                loc.setDirection(chair.direction);
-                player.teleport(loc);
-            });
+        Bukkit.getScheduler().runTask(this, () -> teleportOut(chair));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onBlockBreak(BlockBreakEvent event) {
+    private void onBlockBreak(BlockBreakEvent event) {
         final Chair chair = blockMap.get(toBlockVector(event.getBlock()));
         if (chair == null) return;
         disableChair(chair);
+        teleportOut(chair);
     }
 }
