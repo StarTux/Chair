@@ -20,7 +20,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityDismountEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -143,11 +147,45 @@ public final class ChairPlugin extends JavaPlugin implements Listener {
         Bukkit.getScheduler().runTask(this, () -> teleportOut(chair));
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onBlockBreak(BlockBreakEvent event) {
-        final Chair chair = blockMap.get(toBlockVector(event.getBlock()));
-        if (chair == null) return;
+    private void removeChairBlock(Block block) {
+        final Chair chair = blockMap.get(toBlockVector(block));
+        if (chair == null) {
+            return;
+        }
         disableChair(chair);
         teleportOut(chair);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private void onBlockBreak(BlockBreakEvent event) {
+        removeChairBlock(event.getBlock());
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private void onBlockExplode(BlockExplodeEvent event) {
+        for (Block block : event.blockList()) {
+            removeChairBlock(block);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private void onEntityExplode(EntityExplodeEvent event) {
+        for (Block block : event.blockList()) {
+            removeChairBlock(block);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private void onBlockPistonExtend(BlockPistonExtendEvent event) {
+        for (Block block : event.getBlocks()) {
+            removeChairBlock(block);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private void onBlockPistonRetract(BlockPistonRetractEvent event) {
+        for (Block block : event.getBlocks()) {
+            removeChairBlock(block);
+        }
     }
 }
